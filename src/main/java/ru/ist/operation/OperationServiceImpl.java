@@ -6,11 +6,13 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ist.account.AccountRepository;
 import ru.ist.account.model.Account;
 import ru.ist.category.model.Category;
 import ru.ist.operation.dto.OperationDto;
 import ru.ist.operation.dto.OperationInputDto;
 import ru.ist.operation.dto.OperationUpdateDto;
+import ru.ist.operation.exceptions.OperationValidation;
 import ru.ist.operation.model.Operation;
 import ru.ist.operation.model.OperationType;
 import ru.ist.operation.model.QOperation;
@@ -29,16 +31,29 @@ public class OperationServiceImpl implements OperationService {
     private final MapperService mapperService;
     private final ValidationService validationService;
     private final OperationRepository operationRepository;
+    private final AccountRepository accountRepository;
 
     @Override
     public OperationDto addOperation(OperationInputDto operationInputDto) {
         Account account = validationService.validateAccount(operationInputDto.getAccount_id());
         Category category = validationService.validateCategory(operationInputDto.getCategory_id());
 
-        Operation operation = mapperService.toOperation(operationInputDto, account, category);
+        if (operationInputDto.getOperationType().equals(OperationType.OUTCOME) && account.getAmount() < operationInputDto.getAmount()) {
+            throw new OperationValidation("На счету " + account.getTitle() + " недостаточно средств");
+        }
+
+        if (operationInputDto.getOperationType().equals(OperationType.OUTCOME)) {
+            account.setAmount(account.getAmount() - operationInputDto.getAmount());
+        } else if (operationInputDto.getOperationType().equals(OperationType.INCOME)) {
+            account.setAmount(account.getAmount() + operationInputDto.getAmount());
+        }
+
+        Operation operation = operationRepository.save(mapperService.toOperation(operationInputDto, account, category));
+
+        accountRepository.save(account);
 
         log.info("Добавлена новая операция: " + operation);
-        return mapperService.toOperationDto(operationRepository.save(operation));
+        return mapperService.toOperationDto(operation);
     }
 
     @Override
