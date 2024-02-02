@@ -38,10 +38,6 @@ public class OperationServiceImpl implements OperationService {
         Account account = validationService.validateAccount(operationInputDto.getAccount_id());
         Category category = validationService.validateCategory(operationInputDto.getCategory_id());
 
-        if (operationInputDto.getOperationType().equals(OperationType.OUTCOME) && account.getAmount() < operationInputDto.getAmount()) {
-            throw new OperationValidation("На счету " + account.getTitle() + " недостаточно средств");
-        }
-
         if (operationInputDto.getOperationType().equals(OperationType.OUTCOME)) {
             account.setAmount(account.getAmount() - operationInputDto.getAmount());
         } else if (operationInputDto.getOperationType().equals(OperationType.INCOME)) {
@@ -92,11 +88,12 @@ public class OperationServiceImpl implements OperationService {
     @Override
     public OperationDto updateOperationById(Long id, OperationUpdateDto operationUpdateDto) {
         Operation operation = validationService.validateOperation(id);
+        Account account = validationService.validateAccount(operation.getAccount().getId());
 
         if (operationUpdateDto.getAccountId() != null) {
-            Account account = validationService.validateAccount(operationUpdateDto.getAccountId());
+            Account acc = validationService.validateAccount(operationUpdateDto.getAccountId());
 
-            operation.setAccount(account);
+            operation.setAccount(acc);
         }
 
         if (operationUpdateDto.getCategoryId() != null) {
@@ -105,15 +102,37 @@ public class OperationServiceImpl implements OperationService {
             operation.setCategory(category);
         }
 
+        if (operation.getOperationType().equals(OperationType.INCOME)) {
+            account.setAmount(account.getAmount() - operation.getAmount());
+        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
+            account.setAmount(account.getAmount() + operation.getAmount());
+        }
+
         operation.setOperationType(operationUpdateDto.getOperationType() == null ? operation.getOperationType() : operationUpdateDto.getOperationType());
         operation.setAmount(operationUpdateDto.getAmount() == null ? operation.getAmount() : operationUpdateDto.getAmount());
 
-        return mapperService.toOperationDto(operationRepository.save(operation));
+        if (operation.getOperationType().equals(OperationType.INCOME)) {
+            account.setAmount(account.getAmount() + operation.getAmount());
+        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
+            account.setAmount(account.getAmount() - operation.getAmount());
+        }
+
+        operation = operationRepository.save(operation);
+        accountRepository.save(account);
+
+        return mapperService.toOperationDto(operation);
     }
 
     @Override
     public void deleteOperationById(Long id) {
         Operation operation = validationService.validateOperation(id);
+        Account account = validationService.validateAccount(operation.getAccount().getId());
+
+        if (operation.getOperationType().equals(OperationType.INCOME)) {
+            account.setAmount(account.getAmount() - operation.getAmount());
+        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
+            account.setAmount(account.getAmount() + operation.getAmount());
+        }
 
         log.info("Операция с id = " + id + " успешно удалена");
         operationRepository.deleteById(id);
