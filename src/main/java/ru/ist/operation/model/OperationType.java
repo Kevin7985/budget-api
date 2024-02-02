@@ -1,4 +1,4 @@
-package ru.ist.category.model;
+package ru.ist.operation.model;
 
 public enum OperationType {
     INCOME,

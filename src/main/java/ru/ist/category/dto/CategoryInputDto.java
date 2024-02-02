@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.ist.category.model.OperationType;
+import ru.ist.operation.model.OperationType;
 
 @Data
 @AllArgsConstructor

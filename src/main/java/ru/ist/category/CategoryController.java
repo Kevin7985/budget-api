@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.ist.category.dto.CategoryDto;
 import ru.ist.category.dto.CategoryInputDto;
 import ru.ist.category.dto.CategoryUpdateDto;
-import ru.ist.category.model.OperationType;
+import ru.ist.operation.model.OperationType;
 
 import java.util.List;
 
@@ -29,9 +29,9 @@ public class CategoryController {
 
     @GetMapping
     public List<CategoryDto> getCategories(
-            @RequestParam(defaultValue = "") List<OperationType> operationTypes
+            @RequestParam(required = false) OperationType operationType
     ) {
-        return categoryService.getCategories(operationTypes);
+        return categoryService.getCategories(operationType);
     }
 
     @GetMapping("/{id}")

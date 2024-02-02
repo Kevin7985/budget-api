@@ -2,7 +2,7 @@ package ru.ist.category.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.ist.category.model.OperationType;
+import ru.ist.operation.model.OperationType;
 
 @Data
 @AllArgsConstructor

@@ -7,7 +7,7 @@ import ru.ist.category.dto.CategoryDto;
 import ru.ist.category.dto.CategoryInputDto;
 import ru.ist.category.dto.CategoryUpdateDto;
 import ru.ist.category.model.Category;
-import ru.ist.category.model.OperationType;
+import ru.ist.operation.model.OperationType;
 import ru.ist.service.MapperService;
 import ru.ist.service.ValidationService;
 
@@ -31,9 +31,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getCategories(List<OperationType> operationTypesList) {
-        if (!operationTypesList.isEmpty()) {
-            return categoryRepository.findByOperationTypeIn(operationTypesList).stream()
+    public List<CategoryDto> getCategories(OperationType operationType) {
+        if (operationType != null) {
+            return categoryRepository.findByOperationType(operationType).stream()
                     .map(mapperService::toCategoryDto)
                     .collect(Collectors.toList());
         }
