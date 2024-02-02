@@ -10,12 +10,15 @@ import ru.ist.account.exceptions.AccountValidation;
 import ru.ist.category.exceptions.CategoryNotFound;
 import ru.ist.category.exceptions.CategoryValidation;
 import ru.ist.error.model.ApiError;
+import ru.ist.operation.exceptions.OperationNotFound;
+import ru.ist.operation.exceptions.OperationValidation;
 
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler({
             AccountValidation.class,
-            CategoryValidation.class
+            CategoryValidation.class,
+            OperationValidation.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError badRequestHandler(final Exception e) {
@@ -27,7 +30,8 @@ public class ErrorHandler {
 
     @ExceptionHandler({
             AccountNotFound.class,
-            CategoryNotFound.class
+            CategoryNotFound.class,
+            OperationNotFound.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError notFoundHandler(final Exception e) {
