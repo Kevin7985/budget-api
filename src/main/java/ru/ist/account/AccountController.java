@@ -29,9 +29,9 @@ public class AccountController {
 
     @GetMapping
     public List<AccountDto> getAccounts(
-            @RequestParam(defaultValue = "") List<Valute> valuteList
+            @RequestParam(defaultValue = "") List<Valute> valutes
             ) {
-        return accountService.getAccounts(valuteList);
+        return accountService.getAccounts(valutes);
     }
 
     @GetMapping("/{id}")

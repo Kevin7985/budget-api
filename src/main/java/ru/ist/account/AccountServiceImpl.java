@@ -64,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deleteAccountById(Long id) {
-        Account account = validationService.validateAccount(id);
+        validationService.validateAccount(id);
 
         log.info("Счёт с id = " + id + " успешно удалён");
         accountRepository.deleteById(id);

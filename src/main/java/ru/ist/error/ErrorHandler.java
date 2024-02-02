@@ -7,12 +7,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.ist.account.exceptions.AccountNotFound;
 import ru.ist.account.exceptions.AccountValidation;
+import ru.ist.category.exceptions.CategoryNotFound;
+import ru.ist.category.exceptions.CategoryValidation;
 import ru.ist.error.model.ApiError;
 
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler({
-            AccountValidation.class
+            AccountValidation.class,
+            CategoryValidation.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError badRequestHandler(final Exception e) {
@@ -23,7 +26,8 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({
-            AccountNotFound.class
+            AccountNotFound.class,
+            CategoryNotFound.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError notFoundHandler(final Exception e) {
