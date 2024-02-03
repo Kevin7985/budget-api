@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ist.account.model.Account;
 import ru.ist.category.model.Category;
+import ru.ist.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,10 @@ public class Operation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "account_id")

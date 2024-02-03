@@ -8,13 +8,13 @@ import ru.ist.operation.model.OperationType;
 import java.util.List;
 
 public interface OperationService {
-    OperationDto addOperation(OperationInputDto operationInputDto);
+    OperationDto addOperation(Long userId, OperationInputDto operationInputDto);
 
-    List<OperationDto> getOperations(Long accountId, Long categoryId, OperationType operationType);
+    List<OperationDto> getOperations(Long userId, Long accountId, Long categoryId, OperationType operationType);
 
-    OperationDto getOperationById(Long id);
+    OperationDto getOperationById(Long userId, Long id);
 
-    OperationDto updateOperationById(Long id, OperationUpdateDto operationUpdateDto);
+    OperationDto updateOperationById(Long userId, Long id, OperationUpdateDto operationUpdateDto);
 
-    void deleteOperationById(Long id);
+    void deleteOperationById(Long userId, Long id);
 }

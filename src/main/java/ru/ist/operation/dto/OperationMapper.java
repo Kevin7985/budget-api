@@ -6,14 +6,17 @@ import ru.ist.account.model.Account;
 import ru.ist.category.dto.CategoryDto;
 import ru.ist.category.model.Category;
 import ru.ist.operation.model.Operation;
+import ru.ist.user.dto.UserDto;
+import ru.ist.user.model.User;
 
 import java.time.LocalDateTime;
 
 @Component
 public class OperationMapper {
-    public Operation toOperation(OperationInputDto operationInputDto, Account account, Category category) {
+    public Operation toOperation(OperationInputDto operationInputDto, User user, Account account, Category category) {
         return new Operation(
                 null,
+                user,
                 account,
                 category,
                 operationInputDto.getOperationType(),
@@ -22,9 +25,10 @@ public class OperationMapper {
         );
     }
 
-    public OperationDto toOperationDto(Operation operation, AccountDto accountDto, CategoryDto categoryDto) {
+    public OperationDto toOperationDto(Operation operation, UserDto userDto, AccountDto accountDto, CategoryDto categoryDto) {
         return new OperationDto(
                 operation.getId(),
+                userDto,
                 accountDto,
                 categoryDto,
                 operation.getOperationType(),

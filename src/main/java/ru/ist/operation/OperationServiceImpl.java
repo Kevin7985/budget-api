@@ -9,15 +9,16 @@ import org.springframework.stereotype.Service;
 import ru.ist.account.AccountRepository;
 import ru.ist.account.model.Account;
 import ru.ist.category.model.Category;
+import ru.ist.error.exceptions.Forbidden;
 import ru.ist.operation.dto.OperationDto;
 import ru.ist.operation.dto.OperationInputDto;
 import ru.ist.operation.dto.OperationUpdateDto;
-import ru.ist.operation.exceptions.OperationValidation;
 import ru.ist.operation.model.Operation;
 import ru.ist.operation.model.OperationType;
 import ru.ist.operation.model.QOperation;
 import ru.ist.service.MapperService;
 import ru.ist.service.ValidationService;
+import ru.ist.user.model.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,9 +35,14 @@ public class OperationServiceImpl implements OperationService {
     private final AccountRepository accountRepository;
 
     @Override
-    public OperationDto addOperation(OperationInputDto operationInputDto) {
+    public OperationDto addOperation(Long userId, OperationInputDto operationInputDto) {
+        User user = validationService.validateUser(userId);
         Account account = validationService.validateAccount(operationInputDto.getAccount_id());
         Category category = validationService.validateCategory(operationInputDto.getCategory_id());
+
+        if (!account.getUser().getId().equals(userId) || !category.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
 
         if (operationInputDto.getOperationType().equals(OperationType.OUTCOME)) {
             account.setAmount(account.getAmount() - operationInputDto.getAmount());
@@ -44,7 +50,7 @@ public class OperationServiceImpl implements OperationService {
             account.setAmount(account.getAmount() + operationInputDto.getAmount());
         }
 
-        Operation operation = operationRepository.save(mapperService.toOperation(operationInputDto, account, category));
+        Operation operation = operationRepository.save(mapperService.toOperation(operationInputDto, user, account, category));
 
         accountRepository.save(account);
 
@@ -53,12 +59,14 @@ public class OperationServiceImpl implements OperationService {
     }
 
     @Override
-    public List<OperationDto> getOperations(Long accountId, Long categoryId, OperationType operationType) {
+    public List<OperationDto> getOperations(Long userId, Long accountId, Long categoryId, OperationType operationType) {
+        User user = validationService.validateUser(userId);
+
         QOperation qOperation = QOperation.operation;
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
 
-        JPAQuery<Operation> query = queryFactory.selectFrom(qOperation);
+        JPAQuery<Operation> query = queryFactory.selectFrom(qOperation).where(qOperation.user.id.eq(userId));
 
         if (accountId != null) {
             query.where(qOperation.account.id.eq(accountId));
@@ -72,23 +80,42 @@ public class OperationServiceImpl implements OperationService {
             query.where(qOperation.operationType.eq(operationType));
         }
 
+        log.info("Получение информации об операциях по фильтрам");
         return query.fetch().stream()
                 .map(mapperService::toOperationDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public OperationDto getOperationById(Long id) {
+    public OperationDto getOperationById(Long userId, Long id) {
+        User user = validationService.validateUser(userId);
         Operation operation = validationService.validateOperation(id);
+
+        if (!operation.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
 
         log.info("Получена информация об операции: " + operation);
         return mapperService.toOperationDto(operation);
     }
 
     @Override
-    public OperationDto updateOperationById(Long id, OperationUpdateDto operationUpdateDto) {
+    public OperationDto updateOperationById(Long userId, Long id, OperationUpdateDto operationUpdateDto) {
+        User user = validationService.validateUser(userId);
         Operation operation = validationService.validateOperation(id);
         Account account = validationService.validateAccount(operation.getAccount().getId());
+
+        if (!operation.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
+
+        if (operation.getOperationType().equals(OperationType.INCOME)) {
+            account.setAmount(account.getAmount() - operation.getAmount());
+        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
+            account.setAmount(account.getAmount() + operation.getAmount());
+        }
+
+        accountRepository.save(account);
 
         if (operationUpdateDto.getAccountId() != null) {
             Account acc = validationService.validateAccount(operationUpdateDto.getAccountId());
@@ -100,12 +127,6 @@ public class OperationServiceImpl implements OperationService {
             Category category = validationService.validateCategory(operationUpdateDto.getCategoryId());
 
             operation.setCategory(category);
-        }
-
-        if (operation.getOperationType().equals(OperationType.INCOME)) {
-            account.setAmount(account.getAmount() - operation.getAmount());
-        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
-            account.setAmount(account.getAmount() + operation.getAmount());
         }
 
         operation.setOperationType(operationUpdateDto.getOperationType() == null ? operation.getOperationType() : operationUpdateDto.getOperationType());
@@ -124,9 +145,14 @@ public class OperationServiceImpl implements OperationService {
     }
 
     @Override
-    public void deleteOperationById(Long id) {
+    public void deleteOperationById(Long userId, Long id) {
+        User user = validationService.validateUser(userId);
         Operation operation = validationService.validateOperation(id);
         Account account = validationService.validateAccount(operation.getAccount().getId());
+
+        if (!operation.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
 
         if (operation.getOperationType().equals(OperationType.INCOME)) {
             account.setAmount(account.getAmount() - operation.getAmount());
@@ -137,4 +163,42 @@ public class OperationServiceImpl implements OperationService {
         log.info("Операция с id = " + id + " успешно удалена");
         operationRepository.deleteById(id);
     }
+
+//    @Override
+//    public OperationDto updateOperationById(Long id, OperationUpdateDto operationUpdateDto) {
+//        Operation operation = validationService.validateOperation(id);
+//        Account account = validationService.validateAccount(operation.getAccount().getId());
+//
+//        if (operationUpdateDto.getAccountId() != null) {
+//            Account acc = validationService.validateAccount(operationUpdateDto.getAccountId());
+//
+//            operation.setAccount(acc);
+//        }
+//
+//        if (operationUpdateDto.getCategoryId() != null) {
+//            Category category = validationService.validateCategory(operationUpdateDto.getCategoryId());
+//
+//            operation.setCategory(category);
+//        }
+//
+//        if (operation.getOperationType().equals(OperationType.INCOME)) {
+//            account.setAmount(account.getAmount() - operation.getAmount());
+//        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
+//            account.setAmount(account.getAmount() + operation.getAmount());
+//        }
+//
+//        operation.setOperationType(operationUpdateDto.getOperationType() == null ? operation.getOperationType() : operationUpdateDto.getOperationType());
+//        operation.setAmount(operationUpdateDto.getAmount() == null ? operation.getAmount() : operationUpdateDto.getAmount());
+//
+//        if (operation.getOperationType().equals(OperationType.INCOME)) {
+//            account.setAmount(account.getAmount() + operation.getAmount());
+//        } else if (operation.getOperationType().equals(OperationType.OUTCOME)) {
+//            account.setAmount(account.getAmount() - operation.getAmount());
+//        }
+//
+//        operation = operationRepository.save(operation);
+//        accountRepository.save(account);
+//
+//        return mapperService.toOperationDto(operation);
+//    }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import ru.ist.account.dto.AccountDto;
 import ru.ist.category.dto.CategoryDto;
 import ru.ist.operation.model.OperationType;
+import ru.ist.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OperationDto {
     private final Long id;
+    private final UserDto user;
     private final AccountDto account;
     private final CategoryDto category;
     private final OperationType operationType;

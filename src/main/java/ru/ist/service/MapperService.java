@@ -43,17 +43,17 @@ public class MapperService {
         return categoryMapper.toCategoryDto(category, toUserDto(category.getUser()));
     }
 
-    public Operation toOperation(OperationInputDto operationInputDto, Account account, Category category) {
-        return operationMapper.toOperation(operationInputDto, account, category);
+    public Operation toOperation(OperationInputDto operationInputDto, User user, Account account, Category category) {
+        return operationMapper.toOperation(operationInputDto, user, account, category);
     }
 
     public OperationDto toOperationDto(Operation operation) {
-        return null;
-//        return operationMapper.toOperationDto(
-//                operation,
-//                toAccountDto(operation.getAccount()),
-//                toCategoryDto(operation.getCategory())
-//        );
+        return operationMapper.toOperationDto(
+                operation,
+                toUserDto(operation.getUser()),
+                toAccountDto(operation.getAccount()),
+                toCategoryDto(operation.getCategory())
+        );
     }
 
     public User toUser(UserInputDto userInputDto) {
