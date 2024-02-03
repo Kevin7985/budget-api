@@ -7,5 +7,7 @@ import ru.ist.operation.model.OperationType;
 import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    List<Category> findByOperationType(OperationType operationType);
+    List<Category> findByUser_IdAndOperationType(Long userId, OperationType operationType);
+
+    List<Category> findByUser_Id(Long userId);
 }

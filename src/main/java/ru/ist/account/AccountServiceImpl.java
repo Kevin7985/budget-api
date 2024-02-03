@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.save(mapperService.toAccount(accountInputDto, user));
 
         log.info("Создан новый счёт: " + account);
-        return mapperService.toAccountDto(account, user);
+        return mapperService.toAccountDto(account);
     }
 
     @Override
@@ -40,13 +40,13 @@ public class AccountServiceImpl implements AccountService {
         if (!valuteList.isEmpty()) {
             log.info("Получена информация о счетах с валютами");
             return accountRepository.findByUser_IdAndValuteIn(userId, valuteList).stream()
-                    .map(item -> mapperService.toAccountDto(item, user))
+                    .map(mapperService::toAccountDto)
                     .collect(Collectors.toList());
         }
 
         log.info("Получена информация обо всех счетах");
         return accountRepository.findByUser_Id(userId).stream()
-                .map(item -> mapperService.toAccountDto(item, user))
+                .map(mapperService::toAccountDto)
                 .collect(Collectors.toList());
     }
 
@@ -60,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         log.info("Получение информации о счёте: " + account);
-        return mapperService.toAccountDto(account, user);
+        return mapperService.toAccountDto(account);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
         account.setDescription(accountUpdateDto.getDescription() == null ? account.getDescription() : accountUpdateDto.getDescription());
 
         log.info("Обновлена информация о счёте: " + account);
-        return mapperService.toAccountDto(accountRepository.save(account), user);
+        return mapperService.toAccountDto(accountRepository.save(account));
     }
 
     @Override

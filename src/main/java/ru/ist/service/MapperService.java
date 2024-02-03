@@ -31,16 +31,16 @@ public class MapperService {
         return accountMapper.toAccount(accountInputDto, user);
     }
 
-    public AccountDto toAccountDto(Account account, User user) {
-        return accountMapper.toAccountDto(account, toUserDto(user));
+    public AccountDto toAccountDto(Account account) {
+        return accountMapper.toAccountDto(account, toUserDto(account.getUser()));
     }
 
-    public Category toCategory(CategoryInputDto categoryInputDto) {
-        return categoryMapper.toCategory(categoryInputDto);
+    public Category toCategory(CategoryInputDto categoryInputDto, User user) {
+        return categoryMapper.toCategory(categoryInputDto, user);
     }
 
     public CategoryDto toCategoryDto(Category category) {
-        return categoryMapper.toCategoryDto(category);
+        return categoryMapper.toCategoryDto(category, toUserDto(category.getUser()));
     }
 
     public Operation toOperation(OperationInputDto operationInputDto, Account account, Category category) {

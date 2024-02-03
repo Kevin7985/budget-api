@@ -23,30 +23,31 @@ public class CategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto createCategory(@RequestBody @Valid CategoryInputDto categoryInputDto) {
-        return categoryService.createCategory(categoryInputDto);
+    public CategoryDto createCategory(@RequestHeader("X-Ist-Budget-User-Id") Long userId, @RequestBody @Valid CategoryInputDto categoryInputDto) {
+        return categoryService.createCategory(userId, categoryInputDto);
     }
 
     @GetMapping
     public List<CategoryDto> getCategories(
+            @RequestHeader("X-Ist-Budget-User-Id") Long userId,
             @RequestParam(required = false) OperationType operationType
     ) {
-        return categoryService.getCategories(operationType);
+        return categoryService.getCategories(userId, operationType);
     }
 
     @GetMapping("/{id}")
-    public CategoryDto getCategoryById(@PathVariable Long id) {
-        return categoryService.getCategoryById(id);
+    public CategoryDto getCategoryById(@RequestHeader("X-Ist-Budget-User-Id") Long userId, @PathVariable Long id) {
+        return categoryService.getCategoryById(userId, id);
     }
 
     @PatchMapping("/{id}")
-    public CategoryDto updateCategory(@PathVariable Long id, @RequestBody CategoryUpdateDto categoryUpdateDto) {
-        return categoryService.updateCategoryById(id, categoryUpdateDto);
+    public CategoryDto updateCategory(@RequestHeader("X-Ist-Budget-User-Id") Long userId, @PathVariable Long id, @RequestBody CategoryUpdateDto categoryUpdateDto) {
+        return categoryService.updateCategoryById(userId, id, categoryUpdateDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategoryById(id);
+    public void deleteCategory(@RequestHeader("X-Ist-Budget-User-Id") Long userId, @PathVariable Long id) {
+        categoryService.deleteCategoryById(userId, id);
     }
 }

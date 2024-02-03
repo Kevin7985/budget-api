@@ -8,13 +8,13 @@ import ru.ist.operation.model.OperationType;
 import java.util.List;
 
 public interface CategoryService {
-    CategoryDto createCategory(CategoryInputDto categoryInputDto);
+    CategoryDto createCategory(Long userId, CategoryInputDto categoryInputDto);
 
-    List<CategoryDto> getCategories(OperationType operationType);
+    List<CategoryDto> getCategories(Long userId, OperationType operationType);
 
-    CategoryDto getCategoryById(Long id);
+    CategoryDto getCategoryById(Long userId, Long id);
 
-    CategoryDto updateCategoryById(Long id, CategoryUpdateDto categoryUpdateDto);
+    CategoryDto updateCategoryById(Long userId, Long id, CategoryUpdateDto categoryUpdateDto);
 
-    void deleteCategoryById(Long id);
+    void deleteCategoryById(Long userId, Long id);
 }
