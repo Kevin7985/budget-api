@@ -7,5 +7,7 @@ import ru.ist.account.model.Valute;
 import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findByValuteIn(List<Valute> valuteList);
+    List<Account> findByUser_IdAndValuteIn(Long userId, List<Valute> valuteList);
+
+    List<Account> findByUser_Id(Long userId);
 }

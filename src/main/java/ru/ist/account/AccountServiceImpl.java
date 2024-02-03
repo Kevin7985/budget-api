@@ -8,8 +8,10 @@ import ru.ist.account.dto.AccountInputDto;
 import ru.ist.account.dto.AccountUpdateDto;
 import ru.ist.account.model.Account;
 import ru.ist.account.model.Valute;
+import ru.ist.error.exceptions.Forbidden;
 import ru.ist.service.MapperService;
 import ru.ist.service.ValidationService;
+import ru.ist.user.model.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,48 +25,68 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
 
     @Override
-    public AccountDto createAccount(AccountInputDto accountInputDto) {
-        Account account = mapperService.toAccount(accountInputDto);
+    public AccountDto createAccount(Long userId, AccountInputDto accountInputDto) {
+        User user = validationService.validateUser(userId);
+        Account account = accountRepository.save(mapperService.toAccount(accountInputDto, user));
 
         log.info("Создан новый счёт: " + account);
-        return mapperService.toAccountDto(accountRepository.save(account));
+        return mapperService.toAccountDto(account, user);
     }
 
     @Override
-    public List<AccountDto> getAccounts(List<Valute> valuteList) {
+    public List<AccountDto> getAccounts(Long userId, List<Valute> valuteList) {
+        User user = validationService.validateUser(userId);
+
         if (!valuteList.isEmpty()) {
-            return accountRepository.findByValuteIn(valuteList).stream()
-                    .map(mapperService::toAccountDto)
+            log.info("Получена информация о счетах с валютами");
+            return accountRepository.findByUser_IdAndValuteIn(userId, valuteList).stream()
+                    .map(item -> mapperService.toAccountDto(item, user))
                     .collect(Collectors.toList());
         }
 
-        return accountRepository.findAll().stream()
-                .map(mapperService::toAccountDto)
+        log.info("Получена информация обо всех счетах");
+        return accountRepository.findByUser_Id(userId).stream()
+                .map(item -> mapperService.toAccountDto(item, user))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public AccountDto getAccountById(Long id) {
+    public AccountDto getAccountById(Long userId, Long id) {
+        User user = validationService.validateUser(userId);
         Account account = validationService.validateAccount(id);
 
+        if (!account.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
+
         log.info("Получение информации о счёте: " + account);
-        return mapperService.toAccountDto(account);
+        return mapperService.toAccountDto(account, user);
     }
 
     @Override
-    public AccountDto updateAccountById(Long id, AccountUpdateDto accountUpdateDto) {
+    public AccountDto updateAccountById(Long userId, Long id, AccountUpdateDto accountUpdateDto) {
+        User user = validationService.validateUser(userId);
         Account account = validationService.validateAccount(id);
+
+        if (!account.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
 
         account.setTitle(accountUpdateDto.getTitle() == null ? account.getTitle() : accountUpdateDto.getTitle());
         account.setDescription(accountUpdateDto.getDescription() == null ? account.getDescription() : accountUpdateDto.getDescription());
 
         log.info("Обновлена информация о счёте: " + account);
-        return mapperService.toAccountDto(accountRepository.save(account));
+        return mapperService.toAccountDto(accountRepository.save(account), user);
     }
 
     @Override
-    public void deleteAccountById(Long id) {
-        validationService.validateAccount(id);
+    public void deleteAccountById(Long userId, Long id) {
+        User user = validationService.validateUser(userId);
+        Account account = validationService.validateAccount(id);
+
+        if (!account.getUser().getId().equals(userId)) {
+            throw new Forbidden();
+        }
 
         log.info("Счёт с id = " + id + " успешно удалён");
         accountRepository.deleteById(id);

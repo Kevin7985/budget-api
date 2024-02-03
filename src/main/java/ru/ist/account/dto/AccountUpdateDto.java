@@ -2,7 +2,6 @@ package ru.ist.account.dto;
 
 import lombok.Data;
 import ru.ist.account.exceptions.AccountValidation;
-import ru.ist.account.model.Valute;
 
 @Data
 public class AccountUpdateDto {

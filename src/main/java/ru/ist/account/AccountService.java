@@ -8,13 +8,13 @@ import ru.ist.account.model.Valute;
 import java.util.List;
 
 public interface AccountService {
-    AccountDto createAccount(AccountInputDto accountInputDto);
+    AccountDto createAccount(Long userId, AccountInputDto accountInputDto);
 
-    List<AccountDto> getAccounts(List<Valute> valuteList);
+    List<AccountDto> getAccounts(Long userId, List<Valute> valuteList);
 
-    AccountDto getAccountById(Long id);
+    AccountDto getAccountById(Long userId, Long id);
 
-    AccountDto updateAccountById(Long id, AccountUpdateDto accountUpdateDto);
+    AccountDto updateAccountById(Long userId, Long id, AccountUpdateDto accountUpdateDto);
 
-    void deleteAccountById(Long id);
+    void deleteAccountById(Long userId, Long id);
 }

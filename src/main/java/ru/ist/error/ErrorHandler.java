@@ -9,16 +9,20 @@ import ru.ist.account.exceptions.AccountNotFound;
 import ru.ist.account.exceptions.AccountValidation;
 import ru.ist.category.exceptions.CategoryNotFound;
 import ru.ist.category.exceptions.CategoryValidation;
+import ru.ist.error.exceptions.Forbidden;
 import ru.ist.error.model.ApiError;
 import ru.ist.operation.exceptions.OperationNotFound;
 import ru.ist.operation.exceptions.OperationValidation;
+import ru.ist.user.exceptions.UserNotFound;
+import ru.ist.user.exceptions.UserValidation;
 
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler({
             AccountValidation.class,
             CategoryValidation.class,
-            OperationValidation.class
+            OperationValidation.class,
+            UserValidation.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError badRequestHandler(final Exception e) {
@@ -31,7 +35,8 @@ public class ErrorHandler {
     @ExceptionHandler({
             AccountNotFound.class,
             CategoryNotFound.class,
-            OperationNotFound.class
+            OperationNotFound.class,
+            UserNotFound.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError notFoundHandler(final Exception e) {
@@ -48,6 +53,17 @@ public class ErrorHandler {
     public ApiError conflictHandler(final Exception e) {
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler({
+            Forbidden.class
+    })
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError forbiddenHandler(final Exception e) {
+        return new ApiError(
+                HttpStatus.FORBIDDEN.name(),
                 e.getMessage()
         );
     }

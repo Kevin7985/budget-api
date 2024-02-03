@@ -11,8 +11,9 @@ import ru.ist.category.model.Category;
 import ru.ist.operation.OperationRepository;
 import ru.ist.operation.exceptions.OperationNotFound;
 import ru.ist.operation.model.Operation;
-
-import java.util.Optional;
+import ru.ist.user.UserRepository;
+import ru.ist.user.exceptions.UserNotFound;
+import ru.ist.user.model.User;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class ValidationService {
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
     private final OperationRepository operationRepository;
+    private final UserRepository userRepository;
 
     public Account validateAccount(Long id) {
         return accountRepository.findById(id).orElseThrow(
@@ -36,6 +38,12 @@ public class ValidationService {
     public Operation validateOperation(Long id) {
         return operationRepository.findById(id).orElseThrow(
                 () -> new OperationNotFound("Операция с id = " + id + " не найдена")
+        );
+    }
+
+    public User validateUser(Long id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new UserNotFound("Пользователь с id = " + id + " не найден")
         );
     }
 }
